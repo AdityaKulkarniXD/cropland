@@ -25,15 +25,16 @@ def evaluate():
         t1, t2, label = t1.to(CONFIG["device"]), t2.to(CONFIG["device"]), label.to(CONFIG["device"])
         with torch.no_grad():
             pred = model(t1, t2).squeeze(1)
-            binary_pred = (pred > 0.5).float()  # Apply threshold for clean mask
+            binary_pred = (pred > 0.5).float()
 
-            # Save visualization
+            # Save side-by-side visualization
             save_prediction_images(t1[0], t2[0], binary_pred[0], label[0], CONFIG["output_dir"], idx)
 
             # Compute metrics
-            metrics = compute_metrics(binary_pred, label)
+            metrics = compute_metrics(binary_pred.squeeze(), label.squeeze())
             all_metrics.append(metrics)
 
+    # Average metrics over test dataset
     avg = {k: sum(d[k] for d in all_metrics) / len(all_metrics) for k in all_metrics[0]}
     print("📊 Evaluation Metrics:")
     for k, v in avg.items():
